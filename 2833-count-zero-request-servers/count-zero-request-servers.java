@@ -1,35 +1,25 @@
 class Solution {
-  public int[] countServers(int n, int[][] logs, int x, int[] queries) {
-    int[] ans = new int[queries.length];
-    int[] count = new int[n + 1];
-
-    Arrays.sort(logs, Comparator.comparingInt(log -> log[1]));
-
-    int i = 0;
-    int j = 0;
-    int servers = 0;
-    for (IndexedQuery indexedQuery : getIndexedQueries(queries)) {
-      final int queryIndex = indexedQuery.queryIndex;
-      final int query = indexedQuery.query;
-      for (; j < logs.length && logs[j][1] <= query; ++j)
-        if (++count[logs[j][0]] == 1)
-          ++servers;
-      for (; i < logs.length && logs[i][1] < query - x; ++i)
-        if (--count[logs[i][0]] == 0)
-          --servers;
-      ans[queryIndex] = n - servers;
+    public int[] countServers(int n, int[][] logs, int x, int[] queries) {
+        Arrays.sort(logs, (a, b) -> a[1] - b[1]);
+        int q = queries.length;
+        Integer[] order = new Integer[q];
+        for (int i = 0; i < q; i++) order[i] = i;
+        Arrays.sort(order, (a, b) -> queries[a] - queries[b]);
+        int[] cnt = new int[n + 1];
+        int active = 0, l = 0, r = 0;
+        int[] ans = new int[q];
+        for (int qi : order) {
+            int time = queries[qi];
+            while (r < logs.length && logs[r][1] <= time) {
+                if (cnt[logs[r][0]]++ == 0) active++;
+                r++;
+            }
+            while (l < r && logs[l][1] < time - x) {
+                if (--cnt[logs[l][0]] == 0) active--;
+                l++;
+            }
+            ans[qi] = n - active;
+        }
+        return ans;
     }
-
-    return ans;
-  }
-
-  private record IndexedQuery(int queryIndex, int query){};
-
-  private IndexedQuery[] getIndexedQueries(int[] queries) {
-    IndexedQuery[] indexedQueries = new IndexedQuery[queries.length];
-    for (int i = 0; i < queries.length; ++i)
-      indexedQueries[i] = new IndexedQuery(i, queries[i]);
-    Arrays.sort(indexedQueries, Comparator.comparingInt(IndexedQuery::query));
-    return indexedQueries;
-  }
 }
