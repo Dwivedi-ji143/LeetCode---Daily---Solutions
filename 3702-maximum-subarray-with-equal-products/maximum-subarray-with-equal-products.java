@@ -1,6 +1,6 @@
 class Solution {
   public int maxLength(int[] nums) {
-    final int MAX_LCM = 36_288_000; // 10! x 10
+    final int MAX_LCM = 36_288_000;
     final int n = nums.length;
     int ans = 0;
 
